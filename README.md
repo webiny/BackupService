@@ -71,6 +71,9 @@ BackupService:
 - `Passphrase`: this is the passphrase that will be used by the `gpg` script to encrypt the archives.
 - `S3`: this is your S3 configuration. Note: make sure you get the AWS region name correctly, otherwise the script will hang on the upload process (http://docs.aws.amazon.com/general/latest/gr/rande.html)
 
+## Logs
+
+The library, on each run, generates some logs in the `{TempPath}/logs` folder. You can reference those logs to see how the backup process went and was it successful or not.
 
 ## License and Contributions
 
