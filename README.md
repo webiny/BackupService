@@ -1,10 +1,10 @@
 Backup Service
 ==============
 
-This library is used to create an encrypted backup archive of one or more folder on your server and one or more MongoDb databases.
+This library is used to create an encrypted backup archive of one or more folders on your server and one or more MongoDb databases.
 Once the backup archive is created, it will be stored to the defined S3 bucket. 
 
-The service automatically manages the backups on the S3 bucket and it only upload the backup archive once. If required to keep a weekly,
+The library automatically manages the backups on the S3 bucket and it only uploads the backup archive once. If required to keep a weekly,
 monthly or yearly, using the S3 API backup copies are made, so we don't need to re-upload the same archive multiple times.
  
 The backup is  a `tar gzip` archive, which is then encrypted with `gpg` with the defined passphrase and only then, in this encrypted state,
@@ -22,7 +22,7 @@ For additional versions of the package, visit the [Packagist page](https://packa
 
 ## Configuration
   
-To run the backup script, you create a small PHP script and point it to your config file:
+To run the backup script, just create a small PHP script and point it to your config file:
 ```php
 <?php
 
@@ -35,7 +35,7 @@ $service->createBackup();
 
 You can run the script via CLI or you can configure a cron job.
  
-As for the configuration parameters, where is an example config. 
+As for the configuration parameters, here is an example config. 
 
 ```yaml
 BackupService:
@@ -64,10 +64,10 @@ BackupService:
         Region: # AWS region name where your bucket is located, eg eu-central-1
 ```
 
-- `Folders`: contains one or more folders that will be added to the backup archive.
+- `Folders`: contain one or more folders that will be added to the backup archive.
 - `MongoDatabases`: a list of mongo databases that should be exported (using mongodump) and they will also be included in the backup archive.
 - `Frequency`: by default the script keeps a 24h backup snapshot and a 48h snapshot. You can additionally add a `weekly`, `monthly` and `yearly` snapshot.
-- `TempPath`: this is a writable path on the local machine where the script will place some temporary files and as well some logs that you can later reference and see what the script has been doing.
+- `TempPath`: this is a writable path on the local machine where the script will place some temporary files as well as some logs that you can later reference and see what the script has been doing.
 - `Passphrase`: this is the passphrase that will be used by the `gpg` script to encrypt the archives.
 - `S3`: this is your S3 configuration. Note: make sure you get the AWS region name correctly, otherwise the script will hang on the upload process (http://docs.aws.amazon.com/general/latest/gr/rande.html)
 
