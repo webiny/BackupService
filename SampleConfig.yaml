@@ -1,0 +1,24 @@
+BackupService:
+    Folders:
+        - /var/www/site1.com
+        - /var/www/site2.com
+    MongoDatabases:
+        BackupTest1:
+            Host: 127.0.0.1:27017
+            Database: BackupTest1
+            Username: Admin
+            Password: password
+        BackupTest2:
+            Host: 127.0.0.1:27017
+            Database: BackupTest2
+    Frequency: # daily backup is always on
+        - Week
+        - Month
+    TempPath: "/tmp/backups/"
+    Passphrase: "test-password"
+    S3:
+        RemotePath: "Backups/"
+        AccessId: # S3 access id
+        AccessKey: # S3 access key
+        Bucket: # bucket where to store the backups
+        Region: # AWS region name where your bucket is located, eg eu-central-1
