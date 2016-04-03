@@ -7,12 +7,34 @@
 
 namespace Webiny\BackupService\Lib;
 
+/**
+ * Class Log
+ *
+ * Simple log class.
+ *
+ * @package Webiny\BackupService\Lib
+ */
 class Log
 {
+    /**
+     * @var string Log message buffer.
+     */
     private $log = '';
+
+    /**
+     * @var string Where the log is placed.
+     */
     private $logFolder;
+
+    /**
+     * @var Cli Cli instance so we output all the log messages to the terminal.
+     */
     private $cli;
 
+
+    /**
+     * @param string $tempFolder Path to the temp folder.
+     */
     public function __construct($tempFolder)
     {
         $this->cli = new Cli();
@@ -25,12 +47,20 @@ class Log
         }
     }
 
+    /**
+     * Log a message.
+     *
+     * @param string $msg Message.
+     */
     public function msg($msg)
     {
         $this->log .= date('Y-m-d H:i:s') . ' ' . $msg . "\n";
         $this->cli->line($msg);
     }
 
+    /**
+     * Writes the log buffer to disk.
+     */
     public function writeLog()
     {
         $this->msg('Log end');

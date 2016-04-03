@@ -15,9 +15,22 @@ use Webiny\BackupService\Lib\Log;
 use Webiny\Component\Amazon\S3;
 use Webiny\Component\Config\ConfigObject;
 
+/**
+ * Class Service
+ *
+ *
+ * @package Webiny\BackupService
+ */
 class Service
 {
+    /**
+     * @var ConfigObject
+     */
     private $config;
+
+    /**
+     * @var int Time when the backup started
+     */
     private $startTime;
 
     /**
@@ -25,8 +38,17 @@ class Service
      */
     private $backupConfig;
 
+    /**
+     * @var Log
+     */
     public static $log;
 
+
+    /**
+     * @param string $pathToConfig Path to the backup yaml config.
+     *
+     * @throws \Exception
+     */
     public function __construct($pathToConfig)
     {
         $this->startTime = $this->getTime();
@@ -34,7 +56,9 @@ class Service
         $this->config = \Webiny\Component\Config\Config::getInstance()->yaml($pathToConfig);
         $this->backupConfig = $this->config->BackupService;
 
-        if(!$this->backupConfig->get('TempPath', false) || trim($this->backupConfig->TempPath)=='' || rtrim($this->backupConfig->TempPath, '/')==''){
+        if (!$this->backupConfig->get('TempPath',
+                false) || trim($this->backupConfig->TempPath) == '' || rtrim($this->backupConfig->TempPath, '/') == ''
+        ) {
             throw new \Exception('Please set the TempPath in your configuration.');
         }
 
@@ -47,9 +71,12 @@ class Service
         Cleanup::setTempFolder($this->backupConfig->TempPath);
     }
 
+    /**
+     * Runs the backup process.
+     */
     public function createBackup()
     {
-        try{
+        try {
             // compressor instance
             $compressor = new Compress('backup-' . date('Y-m-d_H-i-s'), $this->backupConfig->TempPath);
 
@@ -65,9 +92,7 @@ class Service
             $backupArchive = $compressor->compress();
 
             // encrypt the archive
-            $backupEncArchiveName = 'encrypted-backup-' . date('Y-m-d_H-i-s') . '.gpg';
-            $encryption = new Encrypt($backupArchive, $backupEncArchiveName,
-                $this->backupConfig->Passphrase, $this->backupConfig->TempPath);
+            $encryption = new Encrypt($backupArchive, $this->backupConfig->Passphrase, $this->backupConfig->TempPath);
             $encArchive = $encryption->encrypt();
 
             $s3 = new Lib\S3($this->backupConfig->get('S3'));
@@ -83,21 +108,21 @@ class Service
 
             // week
             // we always do weekly backups on sunday
-            if(in_array('Week', $frequencies) && date('w')=='0'){
+            if (in_array('Week', $frequencies) && date('w') == '0') {
                 $s3->deleteBackup('backup-week');
                 $s3->copyLatestBackup('backup-week');
             }
 
             // month
             // we always do monthly backups on the last day of the month
-            if(in_array('Month', $frequencies) && date('d')==date('t')){
+            if (in_array('Month', $frequencies) && date('d') == date('t')) {
                 $s3->deleteBackup('backup-month');
                 $s3->copyLatestBackup('backup-month');
             }
 
             // year
             // we always do monthly backups on the last day of the year
-            if(in_array('Year', $frequencies) && date('d.m')=='31.12'){
+            if (in_array('Year', $frequencies) && date('d.m') == '31.12') {
                 $s3->deleteBackup('backup-year');
                 $s3->copyLatestBackup('backup-year');
             }
@@ -109,19 +134,28 @@ class Service
             self::$log->msg('Backup ended');
             self::$log->msg('Execution time: ' . $this->displayTime($this->getTime() - $this->startTime));
             self::$log->writeLog();
-        }catch (\Exception $e){
-            self::$log->msg('ERROR: '.$e->getMessage());
+        } catch (\Exception $e) {
+            self::$log->msg('ERROR: ' . $e->getMessage());
             self::$log->writeLog();
         }
     }
 
+    /**
+     * @return int Gets the current time.
+     */
     private function getTime()
     {
         $timer = explode(' ', microtime());
         $timer = $timer[1] + $timer[0];
+
         return $timer;
     }
 
+    /**
+     * @param int $seconds Displays time in a human readable format.
+     *
+     * @return string
+     */
     private function displayTime($seconds)
     {
         $seconds = round($seconds);

@@ -9,15 +9,40 @@ namespace Webiny\BackupService\Lib;
 
 use Webiny\BackupService\Service;
 
+/**
+ * Class Compress
+ *
+ * This class gets the list of files and folders and creates an archive of them.
+ *
+ * @package Webiny\BackupService\Lib
+ */
 class Compress
 {
+    /**
+     * @var string Compression command we will use.
+     */
     private $cmd = 'tar -czf';
+
+    /**
+     * @var string File extension that will be placed on the archive output filename.
+     */
     private $extension = '.tar.gz';
 
-
+    /**
+     * @var array List of files and folders that will be added to the archive.
+     */
     private $sources;
+
+    /**
+     * @var string A destination where the archive will be placed.
+     */
     private $destination;
 
+
+    /**
+     * @param string $archiveName Archive filename.
+     * @param string $tempFolder Path to the temp folder.
+     */
     public function __construct($archiveName, $tempFolder)
     {
         // check that temp folder exits
@@ -29,6 +54,13 @@ class Compress
         $this->destination = $backupFolder . $archiveName . $this->extension;
     }
 
+    /**
+     * Add one or more file or folders to the archive.
+     *
+     * @param array $sources
+     *
+     * @throws \Exception
+     */
     public function addSources(array $sources)
     {
         foreach ($sources as $s) {
@@ -39,6 +71,12 @@ class Compress
         }
     }
 
+    /**
+     * Compress all the defined $sources into a single archive.
+     *
+     * @return string Path to the archive.
+     * @throws \Exception
+     */
     public function compress()
     {
         Service::$log->msg('Compression started');

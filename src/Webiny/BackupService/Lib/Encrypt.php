@@ -9,14 +9,35 @@ namespace Webiny\BackupService\Lib;
 
 use Webiny\BackupService\Service;
 
+/**
+ * Class Encrypt
+ *
+ * Once the backup archive is created, this class creates an encrypted copy.
+ *
+ * @package Webiny\BackupService\Lib
+ */
 class Encrypt
 {
 
+    /**
+     * @var string Path to the raw archive.
+     */
     private $source;
-    private $destination;
+
+    /**
+     * @var string Passphrase that will be used to encrypt the archive.
+     */
     private $passphrase;
 
-    public function __construct($source, $archiveName, $passphrase, $tempFolder)
+
+    /**
+     * @param string $source     Path to the raw archive.
+     * @param string $passphrase Passphrase that will be used to encrypt the archive.
+     * @param string $tempFolder Path to the temp folder.
+     *
+     * @throws \Exception
+     */
+    public function __construct($source, $passphrase, $tempFolder)
     {
         if (!is_file($source)) {
             throw new \Exception(sprintf('Source file "%s" doesn\'t exist.', $source));
@@ -33,23 +54,27 @@ class Encrypt
         }
 
         $this->source = $source;
-        $this->destination = $backupFolder.$archiveName;
         $this->passphrase = $passphrase;
     }
 
+    /**
+     * Does the archive encryption.
+     * @return string Path to the encrypted archive.
+     * @throws \Exception
+     */
     public function encrypt()
     {
         Service::$log->msg('Encryption started');
 
-        $cmd = 'echo "' . $this->passphrase . '" | gpg --batch --passphrase-fd 0 -c '.$this->source;
+        $cmd = 'echo "' . $this->passphrase . '" | gpg --batch --passphrase-fd 0 -c ' . $this->source;
 
-        Service::$log->msg('Encryption command: '.$cmd);
+        Service::$log->msg('Encryption command: ' . $cmd);
 
         system($cmd);
 
         Service::$log->msg('Encryption ended');
 
-        $archive = $this->source.'.gpg';
+        $archive = $this->source . '.gpg';
 
         Cleanup::addToQueue($archive, Cleanup::TYPE_FILE);
 

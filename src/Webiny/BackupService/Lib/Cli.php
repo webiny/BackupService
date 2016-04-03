@@ -7,6 +7,10 @@
 
 namespace Webiny\BackupService\Lib;
 
+/**
+ * Class Cli
+ * @package Webiny\BackupService\Lib
+ */
 class Cli
 {
     /**
