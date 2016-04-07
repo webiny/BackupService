@@ -91,40 +91,83 @@ class Service
             // compress all the folders and database exports in one archive
             $backupArchive = $compressor->compress();
 
-            // encrypt the archive
-            $encryption = new Encrypt($backupArchive, $this->backupConfig->Passphrase, $this->backupConfig->TempPath);
-            $encArchive = $encryption->encrypt();
-
-            $s3 = new Lib\S3($this->backupConfig->get('S3'));
-
-            // move the old 1-day backup to 2-day backup
-            $s3->moveOldBackup();
-
-            // create new 1 day backup
-            $s3->upload($encArchive, 'backup-1day-old');
-
-            // check if we need 7-day backup and 30-day backup
-            $frequencies = $this->backupConfig->get('Frequency', [], true);
-
-            // week
-            // we always do weekly backups on sunday
-            if (in_array('Week', $frequencies) && date('w') == '0') {
-                $s3->deleteBackup('backup-week');
-                $s3->copyLatestBackup('backup-week');
+            // encrypt the archive -> only if passpharse is set
+            if ($this->backupConfig->get('Passphrase', false)) {
+                $encryption = new Encrypt($backupArchive, $this->backupConfig->Passphrase,
+                    $this->backupConfig->TempPath);
+                $encArchive = $encryption->encrypt();
+            } else {
+                $encArchive = $backupArchive;
             }
 
-            // month
-            // we always do monthly backups on the last day of the month
-            if (in_array('Month', $frequencies) && date('d') == date('t')) {
-                $s3->deleteBackup('backup-month');
-                $s3->copyLatestBackup('backup-month');
+            // check if we should backup to S3
+            if ($this->backupConfig->get('S3', false)) {
+                $s3 = new Lib\S3($this->backupConfig->get('S3'));
+
+                // move the old 1-day backup to 2-day backup
+                $s3->moveOldBackup();
+
+                // create new 1 day backup
+                $s3->upload($encArchive, 'backup-1day-old');
+
+                // check if we need 7-day backup and 30-day backup
+                $frequencies = $this->backupConfig->get('Frequency', [], true);
+
+                // week
+                // we always do weekly backups on sunday
+                if (in_array('Week', $frequencies) && date('w') == '0') {
+                    $s3->deleteBackup('backup-week');
+                    $s3->copyLatestBackup('backup-week');
+                }
+
+                // month
+                // we always do monthly backups on the last day of the month
+                if (in_array('Month', $frequencies) && date('d') == date('t')) {
+                    $s3->deleteBackup('backup-month');
+                    $s3->copyLatestBackup('backup-month');
+                }
+
+                // year
+                // we always do monthly backups on the last day of the year
+                if (in_array('Year', $frequencies) && date('d.m') == '31.12') {
+                    $s3->deleteBackup('backup-year');
+                    $s3->copyLatestBackup('backup-year');
+                }
             }
 
-            // year
-            // we always do monthly backups on the last day of the year
-            if (in_array('Year', $frequencies) && date('d.m') == '31.12') {
-                $s3->deleteBackup('backup-year');
-                $s3->copyLatestBackup('backup-year');
+            // check if a file system backup is required
+            if ($this->backupConfig->get('BackupStoragePath', false)) {
+                $fsBackup = new Lib\Filesystem($this->backupConfig->get('BackupStoragePath'));
+
+                // move the old 1-day backup to 2-day backup
+                $fsBackup->moveOldBackup();
+
+                // create new 1 day backup
+                $fsBackup->upload($encArchive, 'backup-1day-old');
+
+                // check if we need 7-day backup and 30-day backup
+                $frequencies = $this->backupConfig->get('Frequency', [], true);
+
+                // week
+                // we always do weekly backups on sunday
+                if (in_array('Week', $frequencies) && date('w') == '0') {
+                    $fsBackup->deleteBackup('backup-week');
+                    $fsBackup->copyLatestBackup('backup-week');
+                }
+
+                // month
+                // we always do monthly backups on the last day of the month
+                if (in_array('Month', $frequencies) && date('d') == date('t')) {
+                    $fsBackup->deleteBackup('backup-month');
+                    $fsBackup->copyLatestBackup('backup-month');
+                }
+
+                // year
+                // we always do monthly backups on the last day of the year
+                if (in_array('Year', $frequencies) && date('d.m') == '31.12') {
+                    $fsBackup->deleteBackup('backup-year');
+                    $fsBackup->copyLatestBackup('backup-year');
+                }
             }
 
             // do the cleanup

@@ -16,6 +16,7 @@ BackupService:
         - Month
     TempPath: "/tmp/backups/"
     Passphrase: "test-password"
+    BackupStoragePath: "/home/vagrant/Code/Backups/"
     S3:
         RemotePath: "Backups/"
         AccessId: # S3 access id

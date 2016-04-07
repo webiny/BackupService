@@ -56,6 +56,7 @@ BackupService:
         - Month
     TempPath: "/tmp/backups/"
     Passphrase: "test-password"
+    BackupStoragePath: "/mnt/gluster/backups/"
     S3:
         RemotePath: "Backups/"
         AccessId: # S3 access id
@@ -68,8 +69,9 @@ BackupService:
 - `MongoDatabases`: a list of mongo databases that should be exported (using mongodump) and they will also be included in the backup archive.
 - `Frequency`: by default the script keeps a 24h backup snapshot and a 48h snapshot. You can additionally add a `weekly`, `monthly` and `yearly` snapshot.
 - `TempPath`: this is a writable path on the local machine where the script will place some temporary files as well as some logs that you can later reference and see what the script has been doing.
-- `Passphrase`: this is the passphrase that will be used by the `gpg` script to encrypt the archives.
-- `S3`: this is your S3 configuration. Note: make sure you get the AWS region name correctly, otherwise the script will hang on the upload process (http://docs.aws.amazon.com/general/latest/gr/rande.html)
+- `Passphrase`: this is the passphrase that will be used by the `gpg` script to encrypt the archives. Note that encryption is optional, if you don't define the key, the backup won't be encrypted.
+- `BackupStoragePath`: if you wish to store backups on the current filesystem, just set your path here. If the path is not set, the backups won't be stored locally.
+- `S3`: this is your S3 configuration. Note: make sure you get the AWS region name correctly, otherwise the script will hang on the upload process (http://docs.aws.amazon.com/general/latest/gr/rande.html). If you don't set the S3 configuration, files won't be stored to S3.
 
 ## Logs
 
