@@ -99,6 +99,12 @@ class BackupMongo
 
         if (isset($db['Password']) && !empty($db['Password'])) {
             $cmd .= ' --password ' . $db['Password'];
+
+            if(!isset($db['AuthenticationDatabase'])){
+                $cmd .= ' --authenticationDatabase admin';
+            }else{
+                $cmd .= ' --authenticationDatabase '.$db['AuthenticationDatabase'];
+            }
         }
 
         // create a folder for this database export

@@ -8,6 +8,7 @@ BackupService:
             Database: BackupTest1
             Username: Admin
             Password: password
+            AuthenticationDatabase: admin
         BackupTest2:
             Host: 127.0.0.1:27017
             Database: BackupTest2
