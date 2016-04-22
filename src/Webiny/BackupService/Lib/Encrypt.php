@@ -67,10 +67,10 @@ class Encrypt
         Service::$log->msg('Encryption started');
 
         if ($this->encryptConfig->get('Type', 'openssl') == 'openssl') {
-            $cmd = 'openssl aes-128-cbc -salt -in '.$this->source.' -out '.$this->source.'.aes -k "'.$this->encryptConfig->Passphrase.'"';
-            $archive = $this->source . '.aes';
+            $cmd = 'openssl bf < '.$this->source.' > '.$this->source.'.bf -k \''.$this->encryptConfig->Passphrase.'\'';
+            $archive = $this->source . '.bf';
         } else if ($this->encryptConfig->get('Type') == 'gpg') {
-            $cmd = 'echo "' . $this->encryptConfig->Passphrase . '" | gpg --batch --passphrase-fd 0 -c ' . $this->source;
+            $cmd = 'echo \'' . $this->encryptConfig->Passphrase . '\' | gpg --batch --passphrase-fd 0 -c ' . $this->source;
             $archive = $this->source . '.gpg';
         } else {
             throw new \Exception(sprintf('Unknown encryption type "%s"', $this->encryptConfig->get('Type')));
