@@ -82,7 +82,7 @@ Depending on the type of the decryption you used, you need to follow the followi
 ### Openssl
 
 ```
-openssl aes-128-cbc -d -salt -in backup-1day-old -out backup.restored.tar
+openssl bf -d < backup-1day-old > backup.restored.tar.gz
 ```
 This will prompt you for your passphrase. If the passphrase is correct, the archive will be decrypted and then you can extract it.
  
@@ -95,7 +95,7 @@ If you are not sure how to do that, have a look at this StackOverflow answer: ht
 Once you have your backup on your machine, together with your gpg key, enter the following command in your terminal do decrypt the archive:
 
 ```
-gpg --output backup.restored.tar --decrypt backup-1day-old
+gpg --output backup.restored.tar.gz --decrypt backup-1day-old
 ```
 This will prompt you for your passphrase. If the passphrase is correct, the archive will be decrypted and then you can extract it.
 
