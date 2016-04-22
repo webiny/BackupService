@@ -76,7 +76,7 @@ class Encrypt
             throw new \Exception(sprintf('Unknown encryption type "%s"', $this->encryptConfig->get('Type')));
         }
 
-        Service::$log->msg('Encryption command: ' . $cmd);
+        Service::$log->msg('Encryption command: ' . $this->encryptConfig->get('Type'));
 
         system($cmd);
 
