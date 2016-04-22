@@ -37,7 +37,7 @@ class S3
     public function __construct(ConfigObject $s3Config)
     {
         $this->s3Instance = new \Webiny\Component\Amazon\S3($s3Config->AccessId, $s3Config->AccessKey,
-            $s3Config->Region);
+            $s3Config->Region, $s3Config->get('Endpoint', null));
         $this->s3Config = $s3Config;
     }
 
