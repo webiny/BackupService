@@ -25,25 +25,25 @@ class Encrypt
     private $source;
 
     /**
-     * @var string Passphrase that will be used to encrypt the archive.
+     * @var string $encryptConfig
      */
-    private $passphrase;
+    private $encryptConfig;
 
 
     /**
-     * @param string $source     Path to the raw archive.
-     * @param string $passphrase Passphrase that will be used to encrypt the archive.
-     * @param string $tempFolder Path to the temp folder.
+     * @param string $source        Path to the raw archive.
+     * @param string $encryptConfig Passphrase that will be used to encrypt the archive.
+     * @param string $tempFolder    Path to the temp folder.
      *
      * @throws \Exception
      */
-    public function __construct($source, $passphrase, $tempFolder)
+    public function __construct($source, $encryptConfig, $tempFolder)
     {
         if (!is_file($source)) {
             throw new \Exception(sprintf('Source file "%s" doesn\'t exist.', $source));
         }
 
-        if (empty($passphrase)) {
+        if (empty($encryptConfig->Passphrase)) {
             throw new \Exception(sprintf('Passphrase cannot be empty.'));
         }
 
@@ -54,7 +54,7 @@ class Encrypt
         }
 
         $this->source = $source;
-        $this->passphrase = $passphrase;
+        $this->encryptConfig = $encryptConfig;
     }
 
     /**
@@ -66,15 +66,21 @@ class Encrypt
     {
         Service::$log->msg('Encryption started');
 
-        $cmd = 'echo "' . $this->passphrase . '" | gpg --batch --passphrase-fd 0 -c ' . $this->source;
+        if ($this->encryptConfig->get('Type', 'openssl') == 'openssl') {
+            $cmd = 'openssl aes-128-cbc -salt -in '.$this->source.' -out '.$this->source.'.aes -k "'.$this->encryptConfig->Passphrase.'"';
+            $archive = $this->source . '.aes';
+        } else if ($this->encryptConfig->get('Type') == 'gpg') {
+            $cmd = 'echo "' . $this->encryptConfig->Passphrase . '" | gpg --batch --passphrase-fd 0 -c ' . $this->source;
+            $archive = $this->source . '.gpg';
+        } else {
+            throw new \Exception(sprintf('Unknown encryption type "%s"', $this->encryptConfig->get('Type')));
+        }
 
         Service::$log->msg('Encryption command: ' . $cmd);
 
         system($cmd);
 
         Service::$log->msg('Encryption ended');
-
-        $archive = $this->source . '.gpg';
 
         Cleanup::addToQueue($archive, Cleanup::TYPE_FILE);
 

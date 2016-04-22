@@ -92,8 +92,8 @@ class Service
             $backupArchive = $compressor->compress();
 
             // encrypt the archive -> only if passpharse is set
-            if ($this->backupConfig->get('Passphrase', false)) {
-                $encryption = new Encrypt($backupArchive, $this->backupConfig->Passphrase,
+            if ($this->backupConfig->get('Encryption', false)) {
+                $encryption = new Encrypt($backupArchive, $this->backupConfig->Encryption,
                     $this->backupConfig->TempPath);
                 $encArchive = $encryption->encrypt();
             } else {
