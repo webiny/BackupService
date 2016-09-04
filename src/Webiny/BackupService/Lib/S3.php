@@ -44,8 +44,10 @@ class S3
     /**
      * Upload the give file to S3.
      *
-     * @param string $sourceFile      Path to the source file.
+     * @param string $sourceFile Path to the source file.
      * @param string $destinationFile Name of the file on S3.
+     *
+     * @return string
      */
     public function upload($sourceFile, $destinationFile)
     {
@@ -53,6 +55,8 @@ class S3
         $destinationFile = rtrim($this->s3Config->RemotePath, '/') . '/' . $destinationFile;
         $this->s3Instance->multipartUpload($this->s3Config->Bucket, $destinationFile, $sourceFile, 3);
         Service::$log->msg('Upload ended');
+
+        return $destinationFile;
     }
 
     /**
@@ -76,12 +80,14 @@ class S3
         }
 
         // remove the old 1-day file
-        $destinationFile = rtrim($this->s3Config->RemotePath, '/') . '/backup-1day-old';
-        if ($this->s3Instance->doesObjectExist($this->s3Config->Bucket, $destinationFile)) {
-            $this->s3Instance->deleteObject($this->s3Config->Bucket, $destinationFile);
+        $destinationFileTemp = rtrim($this->s3Config->RemotePath, '/') . '/backup-1day-old';
+        if ($this->s3Instance->doesObjectExist($this->s3Config->Bucket, $destinationFileTemp)) {
+            $this->s3Instance->deleteObject($this->s3Config->Bucket, $destinationFileTemp);
         }
 
         Service::$log->msg('S3: moving old backups done');
+
+        return $destinationFile;
     }
 
     /**
@@ -107,6 +113,8 @@ class S3
      * without the need to re-upload the same file again.
      *
      * @param string $destination Filename.
+     *
+     * @return string
      */
     public function copyLatestBackup($destination)
     {
@@ -120,5 +128,7 @@ class S3
         $destinationFile = rtrim($this->s3Config->RemotePath, '/') . '/' . $destination;
         $this->s3Instance->copyObject($this->s3Config->Bucket, $sourceFile, $this->s3Config->Bucket, $destinationFile);
         Service::$log->msg('S3: copying latest backup into ' . $destination . ' done');
+
+        return $destinationFile;
     }
 }

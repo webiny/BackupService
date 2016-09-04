@@ -40,8 +40,10 @@ class Filesystem
     /**
      * Store the give backup
      *
-     * @param string $sourceFile      Path to the source file.
+     * @param string $sourceFile Path to the source file.
      * @param string $destinationFile Name of the file on S3.
+     *
+     * @return string
      */
     public function upload($sourceFile, $destinationFile)
     {
@@ -49,6 +51,8 @@ class Filesystem
         Service::$log->msg('Filesystem: Copying file to the backup storage location: ' . $sourceFile);
         copy($sourceFile, $destination);
         Service::$log->msg('Filesystem: Copy ended: '.$destination);
+
+        return $destination;
     }
 
     /**
@@ -70,12 +74,14 @@ class Filesystem
         }
 
         // remove the old 1-day file
-        $destinationFile = $this->storagePath. 'backup-1day-old';
-        if (file_exists($destinationFile)) {
-            unlink($destinationFile);
+        $destinationFileTemp = $this->storagePath. 'backup-1day-old';
+        if (file_exists($destinationFileTemp)) {
+            unlink($destinationFileTemp);
         }
 
         Service::$log->msg('Filesystem: moving old backups done');
+
+        return $destinationFile;
     }
 
     /**
@@ -100,6 +106,8 @@ class Filesystem
      * This is used to create the weekly, monthly and yearly snapshots.
      *
      * @param string $destination Filename.
+     *
+     * @return string
      */
     public function copyLatestBackup($destination)
     {
@@ -113,5 +121,7 @@ class Filesystem
         $destinationFile = $this->storagePath . $destination;
         copy($sourceFile, $destinationFile);
         Service::$log->msg('Filesystem: copying latest backup into ' . $destination . ' done');
+
+        return $destinationFile;
     }
 }

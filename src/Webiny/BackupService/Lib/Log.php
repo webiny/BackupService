@@ -55,7 +55,12 @@ class Log
     public function msg($msg)
     {
         $this->log .= date('Y-m-d H:i:s') . ' ' . $msg . "\n";
-        $this->cli->line($msg);
+
+        if (php_sapi_name() === 'cli') {
+            $this->cli->line($msg);
+        } else {
+            echo $msg . "<br/>\n";
+        }
     }
 
     /**
@@ -65,5 +70,10 @@ class Log
     {
         $this->msg('Log end');
         file_put_contents($this->logFolder . 'log-' . date('Y-m-d_H-i-s') . '.log', $this->log);
+    }
+
+    public function getLog()
+    {
+        return $this->log;
     }
 }

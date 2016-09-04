@@ -111,10 +111,19 @@ class BackupMongo
         $folderName = $this->tempFolder . $db['Database'] . '-' . date('Y-m-d');
         $cmd .= ' --out ' . $folderName;
 
-        Service::$log->msg(sprintf('Mongodb: export command ' . $cmd));
+        // mask password from log command
+        if(isset($db['Password'])){
+            $logCommand = str_replace(' --password ' . $db['Password'], ' --password xxxxxx', $cmd);
+        }else{
+            $logCommand = $cmd;
+        }
 
-        system($cmd);
 
+        Service::$log->msg(sprintf('Mongodb: export command ' . $logCommand));
+
+        $return = system($cmd);
+
+        Service::$log->msg(sprintf('Mongodb: '.$return));
         Service::$log->msg(sprintf('Mongodb: database export done'));
 
         Cleanup::addToQueue($folderName, Cleanup::TYPE_DIR);
