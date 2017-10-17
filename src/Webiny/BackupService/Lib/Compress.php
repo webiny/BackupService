@@ -21,7 +21,7 @@ class Compress
     /**
      * @var string Compression command we will use.
      */
-    private $cmd = 'tar -czf';
+    private $cmd = 'tar -chzf';
 
     /**
      * @var string File extension that will be placed on the archive output filename.
